@@ -71,10 +71,10 @@ df2 = fetch_data('sheet2')
 df3 = fetch_data('sheet3')
 
 # Display the dataframes in the app
-st.write("## Data from Sheet 1")
-st.write(df1.head())
-st.write("## Data from Sheet 2")
-st.write(df2.head())
+# st.write("## Data from Sheet 1")
+# st.write(df1.head())
+# st.write("## Data from Sheet 2")
+# st.write(df2.head())
 
 # Create plots for both sheets
 fig1 = create_plot(df1, f'{df1.columns[1]} vs {df1.columns[2]} - Sheet 1')
