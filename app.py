@@ -56,7 +56,8 @@ def create_plot(df, title):
             showgrid=False,  # Hide y-axis grid lines
             showline=True,
             showticklabels=True,
-            categoryorder='total ascending' 
+            categoryorder='array',  # Order by the values in the DataFrame
+            categoryarray=list(df[stats_column])[::-1]  # Use the order from the DataFrame and reverse it
         )
     )
 
@@ -69,16 +70,13 @@ df1 = fetch_data('sheet1')
 df2 = fetch_data('sheet2')
 df3 = fetch_data('sheet3')
 
-# Display the dataframes in the app
-# st.write("## Data from Sheet 1")
-# st.write(df1.head())
-# st.write("## Data from Sheet 2")
-# st.write(df2.head())
+
 
 # Create plots for both sheets
-fig1 = create_plot(df1, f'{df1.columns[1]} vs {df1.columns[2]} - Sheet 1')
-fig2 = create_plot(df2, f'{df2.columns[1]} vs {df2.columns[2]} - Sheet 2')
-fig3 = create_plot(df3, f'{df2.columns[1]} vs {df2.columns[2]} - Sheet 3')
+fig1 = create_plot(df1, f'{df1.columns[1]} vs {df1.columns[2]} ')
+fig2 = create_plot(df2, f'{df2.columns[1]} vs {df2.columns[2]} ')
+fig3 = create_plot(df3, f'{df3.columns[1]} vs {df3.columns[2]} ')
+
 
 # Display the Plotly figures in the Streamlit app
 st.plotly_chart(fig1)
@@ -87,5 +85,4 @@ st.plotly_chart(fig3)
 
 # Run the Streamlit app
 if __name__ == "__main__":
-    st.title("MIAS")
-    
+    st.write("MIAS")
