@@ -1,6 +1,12 @@
+
+
+
 import streamlit as st
 import pandas as pd
 import plotly.graph_objs as go
+
+# Set page configuration
+# st.set_page_config(layout="wide")
 
 # Google Sheets document ID
 document_id = '1oCS-ubjn2FtmkHevCToSCfcgL6WpjgXA3qoGnsu8IWk'
@@ -9,11 +15,7 @@ def fetch_data(sheet_name):
     url = f'https://docs.google.com/spreadsheets/d/{document_id}/gviz/tq?tqx=out:csv&sheet={sheet_name}'
     return pd.read_csv(url)
 
-
-
-
-
-def create_team_plot(df, title):
+def create_plot(df, title):
     stats_column = df.columns[0]
     team1_column = df.columns[1]
     team2_column = df.columns[2]
@@ -65,7 +67,6 @@ def create_team_plot(df, title):
     fig = go.Figure(data=[trace1, trace2], layout=layout)
     return fig
 
-
 def create_player_stat_plot(df, title):
     player_column = df.columns[0]
     stat_column = df.columns[1]
@@ -109,102 +110,36 @@ def create_player_stat_plot(df, title):
     fig = go.Figure(data=[trace], layout=layout)
     return fig
 
-def create_radar_chart(df, player1, player2):
-    metrics = df.columns[1:].tolist()
-    
-    player1_data = df[df['Player'] == player1].iloc[0, 1:].tolist()
-    player2_data = df[df['Player'] == player2].iloc[0, 1:].tolist()
-
-    trace1 = go.Scatterpolar(
-        r=player1_data,
-        theta=metrics,
-        fill='toself',
-        name=player1,
-        marker=dict(color='blue')
-    )
-
-    trace2 = go.Scatterpolar(
-        r=player2_data,
-        theta=metrics,
-        fill='toself',
-        name=player2,
-        marker=dict(color='red')
-    )
-
-    layout = go.Layout(
-        polar=dict(
-            radialaxis=dict(
-                visible=True,
-                range=[0, 100]
-            )
-        ),
-        showlegend=True
-    )
-
-    fig = go.Figure(data=[trace1, trace2], layout=layout)
-    return fig
-
-
-# Fetch data for three games
+# Fetch data from sheets
+st.title("Match Day Team Stats")
 df1 = fetch_data('sheet1')
 df2 = fetch_data('sheet2')
 df3 = fetch_data('sheet3')
-
-
 df_assists = fetch_data('Assist')  # Replace 'assist_sheet' with the actual name of the sheet
 df_goals = fetch_data('Goals')  # Replace 'goal_sheet' with the actual name of the sheet
 df_shots = fetch_data('SOT')  # Replace with the actual name of the sheet
-df_saves = fetch_data('Save')
+df_saves = fetch_data('Save')  # Replace with the actual name of the sheet
 
-df_rader = fetch_data("rader")
+# Create plots for team stats
+fig1 = create_plot(df1, f'{df1.columns[1]} vs {df1.columns[2]}')
+fig2 = create_plot(df2, f'{df2.columns[1]} vs {df2.columns[2]}')
+fig3 = create_plot(df3, f'{df3.columns[1]} vs {df3.columns[2]}')
 
-# Create a dictionary for easy access
-game_data = {
-    'Game 1': df1,
-    'Game 2': df2,
-    'Game 3': df3
-}
-
-# Streamlit app
-st.title("Match Day Team Stats")
-
-# Game selection filter
-selected_game = st.selectbox('Select Game', list(game_data.keys()))
-
-# Create plot for the selected game
-selected_df = game_data[selected_game]
-fig = create_team_plot(selected_df, f'{selected_df.columns[1]} vs {selected_df.columns[2]}')
-
-# Display the Plotly figure for the selected game
-st.plotly_chart(fig)
-
+# Create plots for individual player stats
 fig_assists = create_player_stat_plot(df_assists, 'Player Assists')
 fig_goals = create_player_stat_plot(df_goals, 'Player Goals')
 fig_shots = create_player_stat_plot(df_shots, 'Shots on Target')
 fig_saves = create_player_stat_plot(df_saves, 'Player Saves')
 
-
+# Display the Plotly figures in the Streamlit app
+st.plotly_chart(fig1)
+st.plotly_chart(fig2)
+st.plotly_chart(fig3)
 st.plotly_chart(fig_assists)
 st.plotly_chart(fig_goals)
 st.plotly_chart(fig_shots)
 st.plotly_chart(fig_saves)
 
-st.title('Player Comparison Radar Chart')
-
-# Select players
-player1 = st.selectbox('Select First Player', df_rader['Player'])
-player2 = st.selectbox('Select Second Player', df_rader['Player'])
-
-# Ensure two different players are selected
-if player1 != player2:
-
-    st.subheader(f'Stats for {player1}')
-    st.write(df_rader[df_rader['Player'] == player1])
-    
-    st.subheader(f'Stats for {player2}')
-    st.write(df_rader[df_rader['Player'] == player2])
-    
-    fig = create_radar_chart(df_rader, player1, player2)
-    st.plotly_chart(fig)
-else:
-    st.warning("Please select two different players.")
+# Run the Streamlit app
+if __name__ == "__main__":
+    st.write("MIAS")
