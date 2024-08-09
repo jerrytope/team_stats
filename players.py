@@ -58,8 +58,18 @@ st.title('Player Comparison Radar Chart')
 player1 = st.selectbox('Select First Player', df['Player'])
 player2 = st.selectbox('Select Second Player', df['Player'])
 
+
+
+
 # Ensure two different players are selected
 if player1 != player2:
+
+    st.subheader(f'Stats for {player1}')
+    st.write(df[df['Player'] == player1])
+    
+    st.subheader(f'Stats for {player2}')
+    st.write(df[df['Player'] == player2])
+    
     fig = create_radar_chart(df, player1, player2)
     st.plotly_chart(fig)
 else:
