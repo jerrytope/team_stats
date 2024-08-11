@@ -68,12 +68,20 @@ def create_radar_chart(df1, df2, player1, player2):
     player1_data = df[df['Player'] == player1].iloc[:, 4:10].sum()
     player2_data = df[df['Player'] == player2].iloc[:, 4:10].sum()
 
-
-    # st.write(player1_data)
-    # st.write(player2_data)
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.header(f"{player1} Stats")
+        st.write(player1_data)
+    
+    with col2:
+        st.header(f"{player2} Stats")
+        st.write(player2_data) 
 
     player1_data = player1_data.iloc[:].tolist()
     player2_data = player2_data.iloc[:].tolist()
+
+
 
 
 
@@ -188,7 +196,7 @@ df2 = fetch_data('Team_Stats')
 st.title("Team Stats")
 
 
-df2 = df2[['match_id','team_name','team_score','goal_attempt','shot_ON','shot_OFF', 'goalkeeper_saves', 'fouls_committed', 'fouls_drawn']]
+df2 = df2[['match_id','team_name','team_score','goal_attempt','shot_ON','shot_OFF', 'goalkeeper_saves', 'fouls_committed', 'fouls_drawn', 'possession %', 'pass_accuracy %' ]]
 # 'shot_BLOCK', 'shot_accuracy', 'fouls_committed','fouls_drawn','pass_attempt','pass_complete','possession'
 
 
@@ -203,4 +211,4 @@ fig1 = create_plot(match_id_filtered, f'{match_id_filtered.columns[1]} vs {match
 st.plotly_chart(fig1)
 
 
-
+ 
