@@ -188,7 +188,8 @@ df2 = fetch_data('Team_Stats')
 st.title("Team Stats")
 
 
-df2 = df2[['match_id','team_name','team_score','goal_attempt','shot_ON','shot_OFF']]
+df2 = df2[['match_id','team_name','team_score','goal_attempt','shot_ON','shot_OFF', 'goalkeeper_saves', 'fouls_committed', 'fouls_drawn']]
+# 'shot_BLOCK', 'shot_accuracy', 'fouls_committed','fouls_drawn','pass_attempt','pass_complete','possession'
 
 
 match_id = df2['match_id'].unique()
