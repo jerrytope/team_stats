@@ -205,7 +205,7 @@ item = st.sidebar.selectbox("Select Team 1", match_id)
 
 match_id_filtered = df2[df2['match_id'] == item]
 
-st.write(match_id_filtered)
+# st.write(match_id_filtered)
 st.title("Match Day Team Stats")
 fig1 = create_plot(match_id_filtered, f'{match_id_filtered.columns[1]} vs {match_id_filtered.columns[2]} ')
 st.plotly_chart(fig1)
