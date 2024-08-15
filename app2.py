@@ -169,7 +169,7 @@ def create_team_plot(df, title):
             showgrid=False,  # Hide y-axis grid lines
             showline=True,
             showticklabels=True,
-            tickfont=dict(color='black'),  # Set stats values color to black
+            tickfont=dict(color='black', family='Arial Bold'),  # Set stats values color to black
             categoryorder='array',  # Order by the values in the DataFrame
             categoryarray=list(df[stats_column])[::-1]  # Use the order from the DataFrame and reverse it
         )
@@ -217,7 +217,7 @@ def create_player_stat_plot(df, title):
             showgrid=False,  # Hide y-axis grid lines
             showline=True,
             showticklabels=True,
-            tickfont=dict(color='black'),
+            tickfont=dict(color='black',family='Arial Bold'),
             categoryorder='array',  # Order by the values in the DataFrame
             categoryarray=list(df[player_column])[::-1]  # Use the order from the DataFrame and reverse it
         ),
