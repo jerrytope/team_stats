@@ -1,18 +1,23 @@
 import streamlit as st
 import pandas as pd
 import plotly.graph_objs as go
-
-# Set page configuration
-# st.set_page_config(layout="wide")
+import mplsoccer
+from mplsoccer.pitch import Pitch
 
 # Google Sheets document ID
+
+
+# st. set_page_config(layout="wide")
 document_id = '1oCS-ubjn2FtmkHevCToSCfcgL6WpjgXA3qoGnsu8IWk'
 
 def fetch_data(sheet_name):
     url = f'https://docs.google.com/spreadsheets/d/{document_id}/gviz/tq?tqx=out:csv&sheet={sheet_name}'
     return pd.read_csv(url)
 
-def create_plot(df, title):
+
+import plotly.graph_objs as go
+
+def create_team_plot(df, title):
     stats_column = df.columns[0]
     team1_column = df.columns[1]
     team2_column = df.columns[2]
@@ -23,8 +28,9 @@ def create_plot(df, title):
         name=team1_column,
         orientation='h',
         marker=dict(color='blue'),
-        text=df[team1_column],  # Add labels
+        text=[f"<b>{x}</b>" for x in df[team1_column]],  # Make text bold
         textposition='outside',  # Position labels outside the bars
+        textfont=dict(color='black'),  # Set text color to black
         hoverinfo='x+text'  # Hover information
     )
 
@@ -34,8 +40,9 @@ def create_plot(df, title):
         name=team2_column,
         orientation='h',
         marker=dict(color='red'),
-        text=df[team2_column],  # Add labels
+        text=[f"<b>{x}</b>" for x in df[team2_column]],  # Make text bold
         textposition='outside',  # Position labels outside the bars
+        textfont=dict(color='black'),  # Set text color to black
         hoverinfo='x+text'  # Hover information 
     )
 
@@ -56,6 +63,7 @@ def create_plot(df, title):
             showgrid=False,  # Hide y-axis grid lines
             showline=True,
             showticklabels=True,
+            tickfont=dict(color='black'),  # Set stats values color to black
             categoryorder='array',  # Order by the values in the DataFrame
             categoryarray=list(df[stats_column])[::-1]  # Use the order from the DataFrame and reverse it
         )
@@ -64,25 +72,290 @@ def create_plot(df, title):
     fig = go.Figure(data=[trace1, trace2], layout=layout)
     return fig
 
-# Fetch data from both sheets
-st.title("Match Day Team Stats")
+
+
+def create_player_stat_plot(df, title):
+    player_column = df.columns[0]
+    stat_column = df.columns[1]
+    team_column = df.columns[2]
+
+    trace = go.Bar(
+        y=df[player_column],
+        x=df[stat_column],
+        name=title,
+        orientation='h',
+        marker=dict(color='red'),
+        text=df[team_column],  # Add labels
+        textposition='outside',  # Position labels outside the bars
+        hoverinfo='x+text'  # Hover information
+    )
+
+    layout = go.Layout(
+        title=title,
+        barmode='group',
+        bargap=0.5,
+        bargroupgap=0,
+        xaxis=dict(
+            title=title,
+            showgrid=False,  # Hide x-axis grid lines
+            zeroline=True,
+            showline=True,
+            showticklabels=True  # Show x-axis ticks
+        ),
+        yaxis=dict(
+            title='Player',
+            showgrid=False,  # Hide y-axis grid lines
+            showline=True,
+            showticklabels=True,
+            categoryorder='array',  # Order by the values in the DataFrame
+            categoryarray=list(df[player_column])[::-1]  # Use the order from the DataFrame and reverse it
+        ),
+        width=900,  # Set the figure width
+        height=500  # Set the figure height
+    )
+
+    fig = go.Figure(data=[trace], layout=layout)
+    return fig
+
+def create_radar_chart(df, player1, player2):
+    metrics = df.columns[1:].tolist()
+    
+    player1_data = df[df['Player'] == player1].iloc[0, 1:].tolist()
+    player2_data = df[df['Player'] == player2].iloc[0, 1:].tolist()
+
+    trace1 = go.Scatterpolar(
+        r=player1_data,
+        theta=metrics,
+        fill='toself',
+        name=player1,
+        marker=dict(color='blue')
+    )
+
+    trace2 = go.Scatterpolar(
+        r=player2_data,
+        theta=metrics,
+        fill='toself',
+        name=player2,
+        marker=dict(color='red')
+    )
+
+    layout = go.Layout(
+        polar=dict(
+            radialaxis=dict(
+                visible=True,
+                range=[0, 100]
+            )
+        ),
+        showlegend=True
+    )
+
+    fig = go.Figure(data=[trace1, trace2], layout=layout)
+    return fig
+
+import matplotlib.pyplot as plt
+import pandas as pd
+import matplotlib.pyplot as plt
+from mplsoccer.pitch import Pitch
+import seaborn as sns
+
+def plot_pass_map_for_player(player_name, df_pass):
+    # Filter the pass DataFrame for the selected player
+    player_pass_df = df_pass[df_pass['player'] == player_name]
+
+    # Create the pitch
+   
+
+    fig, ax = plt.subplots(figsize=(13.5, 8))
+    fig.set_facecolor('#22312b')
+    ax.patch.set_facecolor('#22312b')
+
+    pitch = Pitch(pitch_type='statsbomb', pitch_color='#22312b', line_color='#c7d5cc')
+    pitch.draw(ax=ax)
+
+
+
+    plt.gca().invert_yaxis()
+
+    #use a for loop to plot each pass
+    for x in range(len(player_pass_df['x'])):
+        if player_pass_df['outcome'][x] == 'Successful':
+            plt.plot((player_pass_df['x'][x],player_pass_df['endX'][x]),(player_pass_df['y'][x],player_pass_df['endY'][x]),color='green')
+            plt.scatter(player_pass_df['x'][x],player_pass_df['y'][x],color='green')
+        if player_pass_df['outcome'][x] == 'Unsuccessful':
+            plt.plot((player_pass_df['x'][x],player_pass_df['endX'][x]),(player_pass_df['y'][x],player_pass_df['endY'][x]),color='red')
+            plt.scatter(player_pass_df['x'][x],player_pass_df['y'][x],color='red')
+
+
+
+
+# Streamlit code to select players and plot their pass maps
+def plot_pass_maps(player1, player2, df_pass):
+    st.subheader(f'Pass Map for {player1}')
+    plot_pass_map_for_player(player1, df_pass)
+    
+    st.subheader(f'Pass Map for {player2}')
+    plot_pass_map_for_player(player2, df_pass)
+
+# Example usage within Streamlit:
+# Assuming you already have the player selection dropdowns:
+# player1 = st.selectbox('Select First Player', player_options)
+# player2 = st.selectbox('Select Second Player', player_options)
+#
+
+# Fetch data for three games
 df1 = fetch_data('sheet1')
 df2 = fetch_data('sheet2')
 df3 = fetch_data('sheet3')
 
 
+df_assists = fetch_data('Assist')  # Replace 'assist_sheet' with the actual name of the sheet
+df_goals = fetch_data('Goals')  # Replace 'goal_sheet' with the actual name of the sheet
+df_shots = fetch_data('SOT')  # Replace with the actual name of the sheet
+df_saves = fetch_data('Save')
 
-# Create plots for both sheets
-fig1 = create_plot(df1, f'{df1.columns[1]} vs {df1.columns[2]} ')
-fig2 = create_plot(df2, f'{df2.columns[1]} vs {df2.columns[2]} ')
-fig3 = create_plot(df3, f'{df3.columns[1]} vs {df3.columns[2]} ')
+df_radar = fetch_data("FW_Rader")
+
+df_pass = fetch_data("Passes")
 
 
-# Display the Plotly figures in the Streamlit app
-st.plotly_chart(fig1)
-st.plotly_chart(fig2)
-st.plotly_chart(fig3)
+# Create a dictionary for easy access
+game_data = {
+    'Game 1': df1,
+    'Game 2': df2,
+    'Game 3': df3
+}
 
-# Run the Streamlit app
-if __name__ == "__main__":
-    st.write("MIAS")
+# Streamlit app
+st.title("Match Day Team Stats")
+
+# Game selection filter
+selected_game = st.selectbox('Select Game', list(game_data.keys()))
+
+# Create plot for the selected game
+selected_df = game_data[selected_game]
+fig = create_team_plot(selected_df, f'{selected_df.columns[1]} vs {selected_df.columns[2]}')
+
+# Display the Plotly figure for the selected game
+st.plotly_chart(fig)
+
+fig_assists = create_player_stat_plot(df_assists, 'Player Assists')
+fig_goals = create_player_stat_plot(df_goals, 'Player Goals')
+fig_shots = create_player_stat_plot(df_shots, 'Shots on Target')
+fig_saves = create_player_stat_plot(df_saves, 'Player Saves')
+
+
+st.plotly_chart(fig_assists)
+st.plotly_chart(fig_goals)
+st.plotly_chart(fig_shots)
+st.plotly_chart(fig_saves)
+
+st.title('Player Comparison Radar Chart')
+
+# Filter by position
+position_options_team = df_radar['Position'].unique()
+selected_position = st.selectbox("Select Position", position_options_team)
+
+if selected_position == 'GK':
+    columns_to_use = ['Player', 'Save Percentage', 'Clean Sheets','Goal Conceded', 'Saves', 'Crosses Stopped', 'Penalty saves', 'Cross Clamed', 'Sweeper actions' ]                 
+elif selected_position == 'FW':
+    columns_to_use = ['Player', 'Goals', 'Shots on target', 'Conversion rate', 'Assists','Goal involvement', 'Penalties won', 'Attacking contribution', 'Minutes per goal']
+elif selected_position == 'MF':
+    columns_to_use = ['Player', 'Goals', 'Assists', 'Tackles', 'Interceptions', 'Chances created', 'Defensive errors','Fouls committed','Blocks','Goal involvement']      
+elif selected_position == 'DF':
+    columns_to_use = ['Player', 'Goals', 'Tackles', 'Fouls Won', 'Blocks', 'Minutes per card','Goal involvement', 'Defensive contribution', 'Defensive errors']        
+
+
+# Filter the radar DataFrame by the selected position
+filtered_df_radar = df_radar[df_radar['Position'] == selected_position]
+filtered_df_radar = filtered_df_radar[columns_to_use]
+
+# Select players from the filtered DataFrame
+player_options = filtered_df_radar['Player'].unique()
+player1 = st.selectbox('Select First Player', player_options)
+player2 = st.selectbox('Select Second Player', player_options)
+
+
+
+
+# Ensure two different players are selected
+if player1 != player2:
+    st.subheader('Player Stats')
+    player1_value = filtered_df_radar[filtered_df_radar['Player'] == player1]
+    player2_value = filtered_df_radar[filtered_df_radar['Player'] == player2]
+    
+    # Merge player data for display and plotting
+    merged_df = pd.concat([player1_value, player2_value], ignore_index=True)
+
+    # col1, col2 = st.columns([1, 3])  # Adjust ratios to increase the width of the second column
+    
+    # # with col2:
+    # #     st.dataframe(merged_df, use_container_width=True)
+    # # Display the DataFrame with a scrollable view
+    st.write(merged_df)
+    # st.dataframe(merged_df, use_container_width=True)  
+
+
+    
+    fig = create_radar_chart(filtered_df_radar, player1, player2)
+    st.plotly_chart(fig)
+else:
+    st.warning("Please select two different players.")
+
+
+import matplotlib.pyplot as plt
+# from mplsoccer import Pitch
+import pandas as pd
+import matplotlib.pyplot as plt
+from mplsoccer.pitch import Pitch
+import seaborn as sns
+
+# def plot_pass_map_for_player(player_name, df_pass):
+#     # Filter the pass DataFrame for the selected player
+#     player_pass_df = df_pass[df_pass['player'] == player_name]
+
+#     # Create the pitch
+#     fig, ax = plt.subplots(figsize=(13.5, 8))
+#     fig.set_facecolor('#22312b')
+#     ax.patch.set_facecolor('#22312b')
+
+#     pitch = Pitch(pitch_type='statsbomb', pitch_color='#22312b', line_color='#c7d5cc')
+#     pitch.draw(ax=ax)
+
+#     # Invert the y-axis
+#     plt.gca().invert_yaxis()
+
+#     # Loop through each pass and plot it on the pitch
+#     for x in range(len(player_pass_df['x'])):
+#         if player_pass_df['outcome'].iloc[x] == 'Successful':
+#             plt.plot(
+#                 (player_pass_df['x'].iloc[x], player_pass_df['endX'].iloc[x]),
+#                 (player_pass_df['y'].iloc[x], player_pass_df['endY'].iloc[x]),
+#                 color='green'
+#             )
+#             plt.scatter(player_pass_df['x'].iloc[x], player_pass_df['y'].iloc[x], color='green')
+#         elif player_pass_df['outcome'].iloc[x] == 'Unsuccessful':
+#             plt.plot(
+#                 (player_pass_df['x'].iloc[x], player_pass_df['endX'].iloc[x]),
+#                 (player_pass_df['y'].iloc[x], player_pass_df['endY'].iloc[x]),
+#                 color='red'
+#             )
+#             plt.scatter(player_pass_df['x'].iloc[x], player_pass_df['y'].iloc[x], color='red')
+
+#     # Set the title for the pass map
+#     plt.title(f'{player_name} Pass Map', color='white', size=20)
+#     plt.show()
+
+# # Streamlit code to select players and plot their pass maps
+# def plot_pass_maps(player1, player2, df_pass):
+#     st.subheader(f'Pass Map for {player1}')
+#     plot_pass_map_for_player(player1, df_pass)
+    
+#     st.subheader(f'Pass Map for {player2}')
+#     plot_pass_map_for_player(player2, df_pass)
+
+# Example usage within Streamlit:
+# Assuming you already have the player selection dropdowns:
+# player1 = st.selectbox('Select First Player', player_options)
+# player2 = st.selectbox('Select Second Player', player_options)
+# plot_pass_map_for_player( player2, df_pass)
+plot_pass_maps(player1, player2, df_pass)
