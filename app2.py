@@ -191,9 +191,13 @@ def create_player_stat_plot(df, title):
         name=title,
         orientation='h',
         marker=dict(color='red'),
-        text=df[team_column],  # Add labels
+        # text=df[team_column],  # Add labels
+        # textposition='outside',  # Position labels outside the bars
+        # hoverinfo='x+text'  # Hover information
+        text=[f"<b>{x}</b>" for x in df[team_column]],  # Make text bold
         textposition='outside',  # Position labels outside the bars
-        hoverinfo='x+text'  # Hover information
+        textfont=dict(color='black'),  # Set text color to black
+        hoverinfo='x+text'  # Hover information 
     )
 
     layout = go.Layout(
@@ -213,6 +217,7 @@ def create_player_stat_plot(df, title):
             showgrid=False,  # Hide y-axis grid lines
             showline=True,
             showticklabels=True,
+            tickfont=dict(color='black'),
             categoryorder='array',  # Order by the values in the DataFrame
             categoryarray=list(df[player_column])[::-1]  # Use the order from the DataFrame and reverse it
         ),
