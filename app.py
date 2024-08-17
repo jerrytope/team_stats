@@ -158,49 +158,37 @@ import matplotlib.pyplot as plt
 from mplsoccer.pitch import Pitch
 import seaborn as sns
 
-def plot_pass_map_for_player(player_name, df_pass):
+def plot_pass_map_for_player(ax, player_name, df_pass):
     # Filter the pass DataFrame for the selected player
     player_pass_df = df_pass[df_pass['player'] == player_name]
 
     # Create the pitch
-   
-
-    fig, ax = plt.subplots(figsize=(13.5, 8))
-    fig.set_facecolor('#22312b')
-    ax.patch.set_facecolor('#22312b')
-
     pitch = Pitch(pitch_type='statsbomb', pitch_color='#22312b', line_color='#c7d5cc')
     pitch.draw(ax=ax)
+    ax.set_title(f'Pass Map for {player_name}', color='white', fontsize=10, pad=20)
+    ax.invert_yaxis()
 
+    # Plot each pass
+    for _, row in player_pass_df.iterrows():
+        if row['outcome'] == 'Successful':
+            ax.plot((row['x'], row['endX']), (row['y'], row['endY']), color='green')
+            ax.scatter(row['x'], row['y'], color='green')
+        elif row['outcome'] == 'Unsuccessful':
+            ax.plot((row['x'], row['endX']), (row['y'], row['endY']), color='red')
+            ax.scatter(row['x'], row['y'], color='red')
 
-
-    plt.gca().invert_yaxis()
-
-    #use a for loop to plot each pass
-    for x in range(len(player_pass_df['x'])):
-        if player_pass_df['outcome'][x] == 'Successful':
-            plt.plot((player_pass_df['x'][x],player_pass_df['endX'][x]),(player_pass_df['y'][x],player_pass_df['endY'][x]),color='green')
-            plt.scatter(player_pass_df['x'][x],player_pass_df['y'][x],color='green')
-        if player_pass_df['outcome'][x] == 'Unsuccessful':
-            plt.plot((player_pass_df['x'][x],player_pass_df['endX'][x]),(player_pass_df['y'][x],player_pass_df['endY'][x]),color='red')
-            plt.scatter(player_pass_df['x'][x],player_pass_df['y'][x],color='red')
-
-
-
-
-# Streamlit code to select players and plot their pass maps
 def plot_pass_maps(player1, player2, df_pass):
-    st.subheader(f'Pass Map for {player1}')
-    plot_pass_map_for_player(player1, df_pass)
-    
-    st.subheader(f'Pass Map for {player2}')
-    plot_pass_map_for_player(player2, df_pass)
+    fig, axs = plt.subplots(1, 2, figsize=(12, 6))  # Two plots side by side
 
-# Example usage within Streamlit:
-# Assuming you already have the player selection dropdowns:
-# player1 = st.selectbox('Select First Player', player_options)
-# player2 = st.selectbox('Select Second Player', player_options)
-#
+    fig.set_facecolor('#22312b')
+    axs[0].patch.set_facecolor('#22312b')
+    axs[1].patch.set_facecolor('#22312b')
+
+    plot_pass_map_for_player(axs[0], player1, df_pass)
+    plot_pass_map_for_player(axs[1], player2, df_pass)
+
+    st.pyplot(fig)
+
 
 # Fetch data for three games
 df1 = fetch_data('sheet1')
@@ -285,12 +273,6 @@ if player1 != player2:
     
     # Merge player data for display and plotting
     merged_df = pd.concat([player1_value, player2_value], ignore_index=True)
-
-    # col1, col2 = st.columns([1, 3])  # Adjust ratios to increase the width of the second column
-    
-    # # with col2:
-    # #     st.dataframe(merged_df, use_container_width=True)
-    # # Display the DataFrame with a scrollable view
     st.write(merged_df)
     # st.dataframe(merged_df, use_container_width=True)  
 
@@ -301,61 +283,114 @@ if player1 != player2:
 else:
     st.warning("Please select two different players.")
 
-
-import matplotlib.pyplot as plt
-# from mplsoccer import Pitch
-import pandas as pd
-import matplotlib.pyplot as plt
-from mplsoccer.pitch import Pitch
-import seaborn as sns
-
-# def plot_pass_map_for_player(player_name, df_pass):
-#     # Filter the pass DataFrame for the selected player
-#     player_pass_df = df_pass[df_pass['player'] == player_name]
-
-#     # Create the pitch
-#     fig, ax = plt.subplots(figsize=(13.5, 8))
-#     fig.set_facecolor('#22312b')
-#     ax.patch.set_facecolor('#22312b')
-
-#     pitch = Pitch(pitch_type='statsbomb', pitch_color='#22312b', line_color='#c7d5cc')
-#     pitch.draw(ax=ax)
-
-#     # Invert the y-axis
-#     plt.gca().invert_yaxis()
-
-#     # Loop through each pass and plot it on the pitch
-#     for x in range(len(player_pass_df['x'])):
-#         if player_pass_df['outcome'].iloc[x] == 'Successful':
-#             plt.plot(
-#                 (player_pass_df['x'].iloc[x], player_pass_df['endX'].iloc[x]),
-#                 (player_pass_df['y'].iloc[x], player_pass_df['endY'].iloc[x]),
-#                 color='green'
-#             )
-#             plt.scatter(player_pass_df['x'].iloc[x], player_pass_df['y'].iloc[x], color='green')
-#         elif player_pass_df['outcome'].iloc[x] == 'Unsuccessful':
-#             plt.plot(
-#                 (player_pass_df['x'].iloc[x], player_pass_df['endX'].iloc[x]),
-#                 (player_pass_df['y'].iloc[x], player_pass_df['endY'].iloc[x]),
-#                 color='red'
-#             )
-#             plt.scatter(player_pass_df['x'].iloc[x], player_pass_df['y'].iloc[x], color='red')
-
-#     # Set the title for the pass map
-#     plt.title(f'{player_name} Pass Map', color='white', size=20)
-#     plt.show()
-
-# # Streamlit code to select players and plot their pass maps
-# def plot_pass_maps(player1, player2, df_pass):
-#     st.subheader(f'Pass Map for {player1}')
-#     plot_pass_map_for_player(player1, df_pass)
-    
-#     st.subheader(f'Pass Map for {player2}')
-#     plot_pass_map_for_player(player2, df_pass)
-
-# Example usage within Streamlit:
-# Assuming you already have the player selection dropdowns:
-# player1 = st.selectbox('Select First Player', player_options)
-# player2 = st.selectbox('Select Second Player', player_options)
-# plot_pass_map_for_player( player2, df_pass)
 plot_pass_maps(player1, player2, df_pass)
+
+import streamlit as st
+import pandas as pd
+from mplsoccer import VerticalPitch
+import matplotlib.pyplot as plt
+
+# Load data
+
+df_new = fetch_data("shoot")
+
+# Streamlit interface
+st.title("Team Shot Analysis")
+
+# Get unique teams from the data
+teams = df_new["team"].unique()
+
+# Define team colors dynamically based on the teams in the data
+team_colors = {team: f"C{i+1:02d}0{i+1:02d}" for i, team in enumerate(teams)}
+
+# Team selection
+team1 = st.selectbox("Select Team 1", teams)
+team2 = st.selectbox("Select Team 2", teams)
+
+# Split df into two parts, one for each team
+team1_df = df_new[df_new["team"] == team1].copy()
+team2_df = df_new[df_new["team"] == team2].copy()
+
+# Split into goals and non-goals for each team
+team1_df_g = team1_df[team1_df["outcome"] == "Goal"].copy()
+team1_df_ng = team1_df[team1_df["outcome"] != "Goal"].copy()
+
+team2_df_g = team2_df[team2_df["outcome"] == "Goal"].copy()
+team2_df_ng = team2_df[team2_df["outcome"] != "Goal"].copy()
+
+# Team stats
+team1_tot_shots = team1_df.shape[0]
+team1_tot_goals = team1_df_g.shape[0]
+team1_tot_xg = team1_df["statsbomb_xg"].sum().round(2)
+
+team2_tot_shots = team2_df.shape[0]
+team2_tot_goals = team2_df_g.shape[0]
+team2_tot_xg = team2_df["statsbomb_xg"].sum().round(2)
+
+# Plotting
+pitch = VerticalPitch(half=True)
+
+fig, ax = plt.subplots(1, 2, figsize=(20, 8))
+
+# Plot for Team 1
+pitch.draw(ax=ax[0])
+ax[0].set_title(f"{team1} Shots vs {team2}")
+
+# Team 1 goals
+pitch.scatter(team1_df_g["start_location_x"],
+              team1_df_g["start_location_y"],
+              s=team1_df_g["statsbomb_xg"]*500+100,
+              marker="football",
+              c=team_colors[team1],
+              ax=ax[0],
+              label=f"{team1} goals")
+# Team 1 non-goals
+pitch.scatter(team1_df_ng["start_location_x"],
+              team1_df_ng["start_location_y"],
+              s=team1_df_ng["statsbomb_xg"]*500+100,
+              c=team_colors[team1],
+              alpha=0.5,
+              hatch="//",
+              edgecolor="#101010",
+              marker="s",
+              ax=ax[0],
+              label=f"{team1} non-goals")
+
+# Plot for Team 2
+pitch.draw(ax=ax[1])
+ax[1].set_title(f"{team2} Shots vs {team1}")
+
+# Team 2 goals
+pitch.scatter(team2_df_g["start_location_x"],
+              team2_df_g["start_location_y"],
+              s=team2_df_g["statsbomb_xg"]*500+100,
+              marker="football",
+              c=team_colors[team2],
+              ax=ax[1],
+              label=f"{team2} goals")
+# Team 2 non-goals
+pitch.scatter(team2_df_ng["start_location_x"],
+              team2_df_ng["start_location_y"],
+              s=team2_df_ng["statsbomb_xg"]*500+100,
+              c=team_colors[team2],
+              alpha=0.5,
+              hatch="//",
+              edgecolor="#101010",
+              marker="s",
+              ax=ax[1],
+              label=f"{team2} non-goals")
+
+# Team 1 stats
+basic_info_txt1 = f"Shots: {team1_tot_shots} | Goals: {team1_tot_goals} | xG: {team1_tot_xg}"
+ax[0].text(0.5, -0.1, basic_info_txt1, size=15, ha="center", transform=ax[0].transAxes)
+
+# Team 2 stats
+basic_info_txt2 = f"Shots: {team2_tot_shots} | Goals: {team2_tot_goals} | xG: {team2_tot_xg}"
+ax[1].text(0.5, -0.1, basic_info_txt2, size=15, ha="center", transform=ax[1].transAxes)
+
+# Legends
+ax[0].legend(labelspacing=1.5, loc="lower center")
+ax[1].legend(labelspacing=1.5, loc="lower center")
+
+# Display the plots
+st.pyplot(fig)
